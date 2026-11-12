@@ -1,0 +1,12 @@
+{
+  "extends": [
+    "../agents/openai-mcp.json",
+    "../models/qwen3-8-flash-next.json",
+    "../backends/mujoco.json",
+    "../methods/go2-pixelgoal.json"
+  ],
+  "workspace_root": ".",
+  "output_dir": "data/runs/mujoco-go2-pixelgoal",
+  "instructions_file": null,
+  "prompts_dir": "configs/benchmarks/main/prompts"
+}

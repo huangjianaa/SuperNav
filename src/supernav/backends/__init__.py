@@ -12,6 +12,11 @@ BACKENDS = {
         "mcp_main": "supernav.methods.demand_driven.mcp:main",
         "mcp_spec": None,
     },
+    "mujoco": {
+        "implementation": "supernav.backends.mujoco.experiment:MujocoBackend",
+        "mcp_main": "supernav.backends.mujoco.mcp_server:main",
+        "mcp_spec": "supernav.backends.mujoco.config:build_mcp_spec",
+    },
 }
 
 

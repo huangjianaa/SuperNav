@@ -1,0 +1,12 @@
+{
+  "environment": {
+    "backend": "mujoco",
+    "locomotion": "auto",
+    "max_actions": 20
+  },
+  "bridge": {
+    "host": "127.0.0.1",
+    "port": 0,
+    "startup_timeout_s": 60
+  }
+}

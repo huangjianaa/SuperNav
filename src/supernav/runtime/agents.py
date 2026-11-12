@@ -125,8 +125,14 @@ def get_agent_backend(agent_name: str) -> HarnessAgent:
         from supernav.runtime.kimi_agent import KimiAgent
 
         return KimiAgent()
+    if name == "openai_mcp":
+        from supernav.runtime.openai_agent import OpenAIMCPAgent
 
-    raise ValueError(f"unknown agent={name!r}; expected one of: codex, codex_profile, kimi, opencode")
+        return OpenAIMCPAgent()
+
+    raise ValueError(
+        f"unknown agent={name!r}; expected one of: codex, codex_profile, kimi, openai_mcp, opencode"
+    )
 
 
 def model_name(model_cfg: Mapping[str, Any]) -> Optional[str]:

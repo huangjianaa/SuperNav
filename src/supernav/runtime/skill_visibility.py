@@ -109,6 +109,32 @@ def probe_skill_visibility(
                 "Print its name, description, and source path; do not call MCP tools."
             ),
         ]
+    elif backend == "openai_mcp":
+        expected = (project_dir / "skills" / skill_name / "SKILL.md").resolve()
+        meta_file = project_dir / "openai_mcp_project.json"
+        text = expected.read_text(encoding="utf-8") if expected.is_file() else ""
+        sys_prompt = (
+            json.loads(meta_file.read_text(encoding="utf-8")).get("system_prompt", "")
+            if meta_file.is_file()
+            else ""
+        )
+        matched_name = skill_name in text
+        matched_desc = description.replace("`", "") in text.replace("`", "")
+        matched_path = expected.is_file() and (skill_name in sys_prompt or matched_desc)
+        visible = bool(matched_name and matched_desc and matched_path)
+        return {
+            "status": "visible" if visible else "not_visible",
+            "backend": backend,
+            "skill_name": skill_name,
+            "expected_path": str(expected),
+            "command": ["openai_mcp_project_check", str(expected)],
+            "returncode": 0 if visible else 1,
+            "matched_name": matched_name,
+            "matched_description": matched_desc,
+            "matched_path": matched_path,
+            "stdout": str(expected) if visible else "",
+            "stderr": "",
+        }
     else:
         raise ValueError(f"unsupported skill visibility backend: {backend}")
 

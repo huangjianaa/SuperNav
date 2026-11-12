@@ -1,0 +1,17 @@
+{
+  "agent": "openai_mcp",
+  "agents": {
+    "openai_mcp": {
+      "timeout_s": 600,
+      "max_turns": 18,
+      "keep_image_turns": 2,
+      "temperature": 0.2,
+      "provider": {
+        "id": "openai-compatible",
+        "type": "openai",
+        "base_url": "${SUPERNAV_LLM_BASE_URL}",
+        "env_key": "SUPERNAV_MAAS_API_KEY"
+      }
+    }
+  }
+}

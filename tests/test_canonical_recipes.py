@@ -145,7 +145,7 @@ def test_arm_inheritance_preserves_parent_fields_and_replaces_child_nested_value
     assert config == original
 
 
-@pytest.mark.parametrize("name", RECIPE_NAMES + ["ai2thor-primitive"])
+@pytest.mark.parametrize("name", RECIPE_NAMES + ["ai2thor-primitive", "mujoco-go2-pixelgoal"])
 def test_new_shared_recipes_have_no_machine_specific_paths(name: str) -> None:
     serialized = json.dumps(_recipe(name))
     for forbidden in ("/home/", "/mnt/", "/nas1/", "http://10.", "https://10."):
@@ -155,7 +155,7 @@ def test_new_shared_recipes_have_no_machine_specific_paths(name: str) -> None:
         assert ip.is_loopback or ip.is_global
 
 
-@pytest.mark.parametrize("name", RECIPE_NAMES + ["ai2thor-primitive"])
+@pytest.mark.parametrize("name", RECIPE_NAMES + ["ai2thor-primitive", "mujoco-go2-pixelgoal"])
 def test_shared_recipes_write_evidence_under_data_runs(name: str) -> None:
     recipe = _recipe(name)
     assert recipe["output_dir"].startswith("data/runs/")
@@ -170,3 +170,16 @@ def test_ai2thor_recipe_selects_primitive_movement_with_explicit_user_provider()
     assert config["arms"] == {"default": {"movement": "primitive", "skill_mode": "none"}}
     assert config["output_dir"] == "data/runs/ai2thor-primitive"
     assert (ROOT / config["prompts_dir"]).is_dir()
+
+
+def test_mujoco_go2_recipe_uses_env_referenced_openai_mcp_and_native_skill() -> None:
+    config = _recipe("mujoco-go2-pixelgoal")
+    assert config["environment"]["backend"] == "mujoco"
+    assert config["agent"] == "openai_mcp"
+    assert config["model"]["name"] == "Qwen3.8-Flash-Next"
+    provider = config["agents"]["openai_mcp"]["provider"]
+    assert provider["env_key"] == "SUPERNAV_MAAS_API_KEY"
+    assert provider["base_url"] == "${SUPERNAV_LLM_BASE_URL}"
+    assert config["arms"]["default"]["skill_name"] == "mujoco-go2-pixelgoal"
+    assert config["instructions_file"] is None
+    assert config["output_dir"] == "data/runs/mujoco-go2-pixelgoal"

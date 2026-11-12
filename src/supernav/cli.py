@@ -130,6 +130,7 @@ def main(argv: list[str] | None = None) -> int:
         ("timing", "supernav.runtime.timing_summary", "Summarize execution timing."),
         ("grounding-check", "supernav.evaluation.grounding", "Evaluate visual grounding."),
         ("image-prune-proxy", "supernav.runtime.image_prune_proxy", "Start the image context proxy."),
+        ("text2mujoco", "supernav.backends.mujoco.text2mujoco", "Generate a MuJoCo 4.0 + Unitree Go2 scene package from text."),
     ):
         commands[name] = (partial(_module_main, module), description)
     parser = argparse.ArgumentParser(

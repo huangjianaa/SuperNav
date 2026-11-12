@@ -50,6 +50,7 @@ data/runs
 data/nav_artifacts/
 data/nav_artifacts_controller/
 *.log
+MUJOCO_LOG.TXT
 
 # Keep externally supplied evaluation tasks out of release commits.
 /configs/benchmarks/**/*.json

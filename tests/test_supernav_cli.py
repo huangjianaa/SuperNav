@@ -45,6 +45,7 @@ def test_root_help_lists_primary_workflows(args, tmp_path):
         ("score-multi-objectnav", "--runs-root"),
         ("export-habitatgs", "--visuals-root"),
         ("score-habitatgs", "--reference"),
+        ("text2mujoco", "--output-dir"),
     ],
 )
 def test_subcommand_help_reaches_its_parser(command, option, tmp_path):
@@ -81,7 +82,12 @@ def test_config_list_and_show_use_catalog(tmp_path):
     result = invoke("config", "list", cwd=tmp_path)
     assert result.returncode == 0, result.stderr
     names = {line.split("\t")[0] for line in result.stdout.splitlines()}
-    assert names == {"ai2thor-primitive", "habitat-geo-based-executor", "habitat-learned-executor"}
+    assert names == {
+        "ai2thor-primitive",
+        "habitat-geo-based-executor",
+        "habitat-learned-executor",
+        "mujoco-go2-pixelgoal",
+    }
     result = invoke("config", "show", "--experiment", "ai2thor-primitive", cwd=tmp_path)
     assert result.returncode == 0, result.stderr
     config = json.loads(result.stdout)

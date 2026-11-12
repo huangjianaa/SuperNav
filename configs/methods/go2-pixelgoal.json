@@ -1,0 +1,31 @@
+{
+  "benchmark_profile": "mujoco_go2_pixelgoal",
+  "skill_runtime": {
+    "root": "skills",
+    "skill_set_id": "mujoco-go2-native-v1",
+    "visibility_gate": "required",
+    "visibility_timeout_s": 30
+  },
+  "mcp": {
+    "name": "mujoco-go2",
+    "transport": "stdio",
+    "environment": {}
+  },
+  "arms": {
+    "default": {
+      "movement": "pixelgoal",
+      "skill_mode": "native",
+      "skill_name": "mujoco-go2-pixelgoal",
+      "skill_names": [
+        "mujoco-go2-pixelgoal"
+      ],
+      "tool_whitelist": [
+        "observe_surround",
+        "pixelgoal_navigate",
+        "pixelgoal_status",
+        "pixelgoal_stop",
+        "claim_goal"
+      ]
+    }
+  }
+}

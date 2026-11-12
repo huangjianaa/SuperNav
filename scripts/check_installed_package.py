@@ -112,8 +112,17 @@ def _worker() -> None:
     _check("--dataset-root" in cli("prepare", "habitatgs", "--help"), "GS preparation help did not render")
     _check("--visuals-root" in cli("export-habitatgs", "--help"), "GS export help did not render")
     _check("--reference" in cli("score-habitatgs", "--help"), "GS scoring help requires a simulator")
+    _check("--output-dir" in cli("text2mujoco", "--help"), "text2mujoco help requires a simulator")
     names = list_experiments()
-    _check(set(names) == {"ai2thor-primitive", "habitat-geo-based-executor", "habitat-learned-executor"}, f"Unexpected installed recipes: {names}")
+    _check(
+        set(names) == {
+            "ai2thor-primitive",
+            "habitat-geo-based-executor",
+            "habitat-learned-executor",
+            "mujoco-go2-pixelgoal",
+        },
+        f"Unexpected installed recipes: {names}",
+    )
     listed = cli("config", "list")
     for name in names:
         _check(f"{name}\t{resolve_experiment(name)}" in listed, f"CLI did not list {name}")
@@ -152,10 +161,11 @@ def _worker() -> None:
         for prefix in ("global-navigation", "multi-global-navigation"):
             skill = f"{prefix}-{executor}"
             _check((assets / "skills" / skill / "SKILL.md").is_file(), f"Multi-goal skill dependency is missing: {skill}")
+    _check((assets / "skills/mujoco-go2-pixelgoal/SKILL.md").is_file(), "MuJoCo Go2 skill is missing")
     for old in ("bench/config/main/config.json", "tools/habitat_agent/prompts", "config/context_budget.yaml"):
         _check(not resolve_asset_path(old, base=Path.cwd()).exists(), f"Unsupported path resolves: {old}")
-    habitat_recipes = [name for name in names if name != "ai2thor-primitive"]
-    for name in habitat_recipes:
+    habitat_recipes = [name for name in names if name.startswith("habitat-")]
+    for name in names:
         config = load_experiment_config(resolve_experiment(name))
         _check(config.get("instructions_file") is None, f"Recipe embeds a benchmark manifest: {name}")
     _check(not list((assets / "configs/benchmarks").rglob("*.json")), "Benchmark task data entered the wheel")
