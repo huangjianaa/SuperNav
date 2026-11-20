@@ -88,7 +88,13 @@ class LivePublisher:
         return time.monotonic() >= self.next_capture
 
     def sample(self, *, position: list[float], heading: float, step: int,
-               path_length: float, capture: Callable, force: bool = False) -> None:
+               path_length: float, capture: Callable | None, force: bool = False) -> None:
+        """Publish one pose sample.
+
+        ``capture=None`` records the pose/trail only and skips the RGB grab, which
+        lets pose-only producers (e.g. MuJoCo's fast sub-hop walk) feed a smooth
+        trail without paying for off-screen renders.
+        """
         if not force and not self.due():
             return
         self.next_capture = time.monotonic() + self.interval
@@ -100,6 +106,9 @@ class LivePublisher:
         if len(trail) > 4000:
             del trail[:-4000]
             self.state["trail_truncated"] = True
+        if capture is None:
+            self.publish()
+            return
         try:
             # Pillow is a base SuperNav dependency, but is only needed by producers.
             from io import BytesIO

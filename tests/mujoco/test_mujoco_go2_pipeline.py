@@ -108,9 +108,17 @@ def test_go2_rl_locomotion_and_lidar_pixelgoal_astar() -> None:
     assert plan["ok"] is True
     assert len(plan["path_xy"]) >= 2
 
-    walk = loco.follow_waypoints(plan["path_xy"], target_yaw=plan["target_yaw"], max_duration_s=8.0)
+    # The walker must surface intermediate control steps, not just the end pose:
+    # the spectator trail relies on these callbacks to stay continuous.
+    callbacks: list[int] = []
+    walk = loco.follow_waypoints(
+        plan["path_xy"], target_yaw=plan["target_yaw"], max_duration_s=8.0,
+        step_callback=lambda step_idx, pose: callbacks.append(step_idx),
+    )
     assert walk["distance_walked_m"] > 0.5
     assert walk["min_up_z"] > 0.80
+    assert len(callbacks) >= 10
+    assert callbacks == sorted(callbacks)
 
 
 def test_openai_mcp_agent_with_mock_qwen_server_end_to_end(tmp_path: Path) -> None:

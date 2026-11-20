@@ -287,6 +287,16 @@ class OpenAIMCPAgent:
             copy_snapshot_skills(Path(str(snapshot_root)), skills_dir)
 
         spec = resolve_mcp_spec(workspace_root=workspace_root, config=config, arm_cfg=arm_cfg)
+        # Per-episode protocol defaults (scene, dataset config, spawn, multi-goal
+        # ledger) are compiled by the backend into a private env block; the Codex,
+        # OpenCode and Kimi runners merge the same block, so the MCP child must see
+        # it here too or init_scene falls back to the dataset "default".
+        mcp_environment = dict(spec.environment)
+        private_env = arm_cfg.get("_benchmark_process_environment")
+        if isinstance(private_env, Mapping):
+            mcp_environment.update(
+                {str(key): str(value) for key, value in private_env.items()}
+            )
         provider = configured_provider(agent_cfg)
         resolved_provider = None
         if provider:
@@ -321,7 +331,7 @@ class OpenAIMCPAgent:
                 "name": spec.name,
                 "command": spec.command,
                 "args": list(spec.args),
-                "environment": dict(spec.environment),
+                "environment": mcp_environment,
             },
         }
         write_json(project_dir / "openai_mcp_project.json", meta)

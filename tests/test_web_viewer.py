@@ -45,6 +45,21 @@ def test_publisher_throttles_capture_and_bounds_sidecar(tmp_path):
     assert json.loads((tmp_path / "session-1.json").read_text())["status"] == "closed"
 
 
+def test_pose_only_sample_records_trail_without_capture(tmp_path):
+    """MuJoCo feeds sub-hop poses with capture=None; the trail must still densify."""
+    publisher = LivePublisher(tmp_path, "session-1", scene="room")
+    # A forced pose-only sample ignores the time throttle and never grabs an image.
+    for i in range(50):
+        publisher.sample(position=[i * 0.05, 0.3, 0.0], heading=0.0, step=1,
+                         path_length=i * 0.05, capture=None, force=True)
+    doc = json.loads((tmp_path / "session-1.json").read_text())
+    assert len(doc["trajectory"]) == 50
+    assert doc["trajectory"][-1] == [49 * 0.05, 0.3, 0.0]
+    # No JPEG is written when the producer passes no capture callable.
+    assert not (tmp_path / "session-1.jpg").exists()
+    assert doc["capture_error"] is None
+
+
 class FakeAdapter:
     """Its step bookkeeping follows the adapter's before-capture ordering."""
     def __init__(self):

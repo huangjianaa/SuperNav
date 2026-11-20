@@ -333,7 +333,29 @@ class Go2MujocoSession:
                 "observation": obs,
             }
 
+        hop_walked = 0.0
+        hop_last: list[float] | None = None
+
         def _on_walk_step(step_idx: int, pose_tuple: tuple[float, float, float, float, float]) -> None:
+            nonlocal hop_walked, hop_last
+            x, y, z, yaw, _up_z = pose_tuple
+            if hop_last is not None:
+                hop_walked += math.hypot(x - hop_last[0], y - hop_last[1])
+            hop_last = [x, y]
+            # Publish the intermediate body pose so the spectator trail follows the
+            # actual curved A* walk instead of one straight jump per hop. MuJoCo
+            # advances faster than wall-clock, so the publisher's time-based
+            # throttle would collapse a whole hop into a single point; force the
+            # pose update but pass no capture callable (atomic JSON write only).
+            if self.live is not None:
+                self.live.sample(
+                    position=[x, z, y],
+                    heading=math.degrees(yaw),
+                    step=self.action_count,
+                    path_length=round(self.path_length_m + hop_walked, 4),
+                    capture=None,
+                    force=True,
+                )
             if step_idx % 20 == 0:
                 self.pixelgoal_map.update_from_lidar(self.model, self.data, self.lidar_site_id)
                 self._record_rollout_panel(label=f"act{self.action_count}")
